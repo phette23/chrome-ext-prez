@@ -1,8 +1,0 @@
-{
-  "generator-reveal": {
-    "presentationTitle": "Writing Chrome Extensions & WikipeDPLA",
-    "packageVersion": "0.0.1",
-    "useSass": true,
-    "deployToGithubPages": false
-  }
-}
