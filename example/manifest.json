@@ -1,0 +1,10 @@
+{
+    "name": "Worldcat Rick Roll",
+    "version": "0.0.1",
+    "manifest_version": 2,
+    "content_scripts": [{
+        "matches": ["*://www.worldcat.org/search*"],
+        "js": ["content.js"],
+        "run_at": "document_end"
+    }]
+}
