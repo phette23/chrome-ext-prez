@@ -1,0 +1,5 @@
+# Writing Chrome Extensions & WikipeDPLA
+
+Presentation for Code4Lib Northern California on July 28th, 2014.
+
+Built using the [Reveal.js Yeoman generator](https://www.npmjs.org/package/generator-reveal).
