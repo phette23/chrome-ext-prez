@@ -1,0 +1,81 @@
+# Slide 1: Title
+
+Hi, I'm Eric Phetteplace and I started as Systems Librarian at CCA a couple of months ago. I'm going to talk generally about writing browser extensions and more specifically about a particular project of mine which inserts DPLA search results onto Wikipedia pages.
+
+# Slide 2: Why write an extension?
+
+Let's start off talking about why you would want to write a browser extension in the first place.
+
+You might want to allow the browser to interact with another native application. The excellent 1Password password manager does this: it has a browser extension which communicates with the app itself, retrieving login details and filling them into web forms.
+
+You also may want to alter the browser's networking layer for some reason. HTTPS Everywhere from the Electronic Frontier Foundation is a good example here; the extension attempts to force as many HTTPS requests as it can. That's the kind of modification that's just not possible with other platforms.
+
+You may want to alter the browser's user interface itself, which isn't supported by any web APIs that I know of. To add a button the performs some function or communicates with a web service, you need to write an extension.
+
+In general, extensions have access to powerful APIs that typically don't make sense for a web app. They can work around limitations that websites or user scripts might have. For my particular project, I was faced with a mixed content policy problem that could  be circumvented by an extension.
+
+# Slide 3: Mixed Content Policy
+
+To understand why I wanted to write a browser extension, you have to know about the browser's mixed content policy which prohibits unencrypted content from being inserted onto a secure page. So if you visit an HTTPS site, the browser by default blocks HTTP resources—which could be anything, from images to CSS or scripts—because those are plain text and could be intercepted and tampered with by a person in the middle attack that would compromise the security of the page. If you're visiting your bank's website, you really don't want that security loophole.
+
+My problem was that Wikipedia is *only* available over HTTPS while DPLA's API is only available over HTTP. So my original project, which was a user script e.g. just a piece of JavaScript which Wikipedia users can choose to inject onto the page, would try to pull in an insecure resource that gets blocked by the browser. Users can override the mixed content blocking, but it's a little different in every browser and requires three clicks in Chrome:
+
+- Click "Search" to query the DPLA
+- The browser blocks the response; click the shield in the URL bar to override
+- The page reloads & you have to click "search" once more for results to actually be inserted
+
+Needless to say, this is a pain and a terrible user experience. No one wants to click three times just to see search results.
+
+# Slide 4: Advantages
+
+There are other advantages to browser extensions besides that specific scenario. Extensions are easier to write because cross-browser compatibility isn't a problem; instead, you're likely targeting the latest three or four versions of Firefox or Chrome, which is a lot easier than attempting to support IE8 and several other browsers.
+
+Because extensions are typically targeted at modern browsers, you often 100% support for advanced features, from HTML5 to CSS3 and the latest ECMAscript standards. So if you want to use IndexedDB for client-side storage, WebRTC for real-time communication, and put constants and block-scoped variables in your JavaScript, you can.
+
+Extensions can be pretty fast too, since resources are loaded from the local filesystem and not over the network. Your users get all your persistent assets in one install and you don't have to worry about cache sizes.
+
+Finally, there are just a number of things you can do in an extension that simply aren't possible otherwise.
+
+# Slide 5: Silly Example
+
+Let's see an actual, working example of a Chrome extension.
+
+This extension changes all the title links of a Worldcat search to point to Rick Astley's "Never Gonna Give You Up" on YouTube. It has a manifest, which is a JSON file that defines certain metadata about your extension, such as what permissions it needs, what types of scripts are included, and its version which is used to publish updates to people who have it installed.
+
+The "content scripts" section is the important part: here we define where we want our scripts to run, which files are the scripts, and then *when* we want them to run. I've chosen "document_end" so that the full DOM of the Worldcat search page is available for modification. By default, Chrome opportunistically chooses a slow moment to inject your script, which means it might get injected either *before* anything is on the page for our script to interact with or *after* the DOMContentLoaded event so we couldn't listen for that.
+
+Finally, we have our content script, which changes all the hrefs of the search result title links.
+
+# Slide 6: UI Types
+
+There are a few user interface options for your browser extension. You can put a button right in the browser's chrome with a "Browser Action" and here are a few examples like 1Password and InstaPaper. These are typically global actions which could be performed at any time. If you want an action to relate to a particular page, you can put a "page action" icon in the URL bar. Zotero, for instance, lets you save the current page to your library via a page action.
+
+Zotero also adds options to the right-click context menu, which is another way to allow users to activate your extension.
+
+You can, as in our silly example, simply use a content script that doesn't expose any user interface. But since content scripts affect the page, you could use the page's DOM to insert a UI. Finally, extensions let you specify an options page where users can interact and save settings. Here's a screenshot of the Context extension which lets you define groups of extensions to enable all at once.
+
+# Slide 7: WikipeDPLA
+
+So let's talk about WikipeDPLA specifically, which I've only vaguely outlined. I wrote it at the LibHack hackathon at ALA MidWinter this year, where one the APIs being covered was DPLA's. I worked with Jake Orlowitz, who is a Wikipedian and provided a lot of insight into how Wikipedia works.
+
+# Slide 8: Content Script
+
+WikipeDPLA has two parts: a content script which interacts with Wikipedia and a background page which queries DPLA and then sends its results to the content script.
+
+The content script scrapes information from the Wikipedia article, such as its title, any "foo redirects here" notices, and its categories. These are later used to construct queries. So, for instance, the page on Competitive Eating is also where "wolfing" redirects and it has these three categories. Chrome has a simple messaging API which is under a global Chrome object that's available on all pages. Our content scripts by default send their messages to the same extension's background.
+
+# Slide 9: Bg Script Pt. I
+
+In the background, we receive the message and use the page's title for our initial query. Once we have some results, we can send a message back to the same tab that messaged us by using its id at `sender.tab.id`.
+
+# Slide 10: Bg Script Pt. II
+
+Inside the background page, there's a little bit more going on around querying the DPLA.
+
+# Slide 11: Back on Wikipedia
+
+Meanwhile, back on Wikipedia there's a small bit of markup injected which, when clicked, loads any available results into the page using the information the background send to us. So here we can get from Competitive Eating right to this picture of a boy who won a doughnut eating contest, courtesy of the Smithsonian.
+
+# Slide 12: Thanks!
+
+Thanks! Here are some links related to the project and I'd be happy to answer questions. The slides are available at phette.net/m and contain a few links to handy resources.
