@@ -22,3 +22,5 @@ Array.prototype.forEach.call(
         el.href = 'http://youtu.be/dQw4w9WgXcQ';
 });
 ```
+
+[Manifest](https://developer.chrome.com/extensions/manifest) documentation | [Content Script](https://developer.chrome.com/extensions/content_scripts) documentation

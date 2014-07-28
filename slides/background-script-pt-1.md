@@ -3,7 +3,7 @@
 ```js
 chrome.runtime.onMessage.addListener(function (request, sender) {
     var wp = request;
-    query = request.title;
+    query = wp.title;
 
     getDPLAresults(wp, function (suggestions) {
         chrome.tabs.sendMessage(sender.tab.id, suggestions);
